@@ -39,7 +39,7 @@ class Game:
             Platform(540, 650, 120, 120, 'assets/platform.png'),
             Platform(440, 550, 120, 120, 'assets/platform.png')
         ]
-        while len(self.platforms) < 8:
+        while len(self.platforms) < 9:
             rand = random.choice([-100, 100])
             self.platforms.append(
                 Platform(
@@ -76,15 +76,18 @@ class Game:
             self.draw_scene()
             self.draw_player_jump(i)
             i += 1
-        self.platforms.pop(0)
-        rand = random.choice([-100, 100])
-        self.platforms.append(
-            Platform(
-                (self.platforms[-1].x + rand),
-                (self.platforms[-1].y - 100),
-                120, 120, 'assets/platform.png')
-        )
-        self.set_item(self.platforms[-1])
+        if not self.player.just_revived:
+            if len(self.platforms) == 10:
+                self.platforms.pop(0)
+            rand = random.choice([-100, 100])
+            self.platforms.append(
+                Platform(
+                    (self.platforms[-1].x + rand),
+                    (self.platforms[-1].y - 100),
+                    120, 120, 'assets/platform.png')
+            )
+            self.set_item(self.platforms[-1])
+        self.player.just_revived = False
 
     def is_on_platform(self):
         for platform in self.platforms:
@@ -98,8 +101,10 @@ class Game:
         high_score_text = font.render(str(self.player.high_score), False, (0, 0, 0))
         total_coins = font.render(str(self.player.coins), False, (0, 0, 0))
         total_lives = font.render(str(self.player.hearts), False, (0, 0, 0))
+
         pygame.draw.rect(self.window, "white", (0, 0, 120, 120), border_radius=10)
         self.window.blit(current_score, (10, 30, 80, 80))
+
         pygame.draw.rect(self.window, "white", (0, 120, 120, 120), border_radius=10)
         self.window.blit(high_score_text, (10, 150, 80, 80))
 
@@ -143,7 +148,6 @@ class Game:
                 self.window.blit(self.player.loss_face_lf, (self.player.x, self.player.y))
             elif self.player.direction == -1:
                 self.window.blit(self.player.loss_face_rf, (self.player.x, self.player.y))
-            self.display_hub()
             pygame.display.update()
             self.player.y += i ^ 2
             i += 2
@@ -185,14 +189,15 @@ class Game:
 
     def game_over_menu(self):
         self.draw_player_game_over()
-        if self.player.score > self.player.high_score:
-            self.player.high_score = self.player.score
-        self.player.score = 0
         pygame.time.wait(1000)
         pygame.event.clear()
         font = pygame.font.SysFont('bauhaus', 50)
         try_again = font.render('Press any key to try again', False, (200, 0, 0))
         self.window.blit(try_again, (350, 420))
+        if self.player.hearts > 0:
+            font = pygame.font.SysFont('bauhaus', 50)
+            try_again = font.render('Press return to revive', False, (200, 0, 0))
+            self.window.blit(try_again, (350, 460))
         pygame.display.update()
         while True:
             events = pygame.event.get()
@@ -201,8 +206,31 @@ class Game:
                     self.called_to_exit = True
                     return
                 elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        if self.player.hearts > 0:
+                            self.use_heart(self.player.direction)
+                            return
+                    if self.player.score > self.player.high_score:
+                        self.player.high_score = self.player.score
+                    self.player.score = 0
                     self.set_platforms()
                     self.sky.y = -14197
                     self.player.direction = 1
                     self.player.y = 650
                     return
+
+    def use_heart(self, direction):
+        self.player.hearts -= 1
+        self.player.just_revived = True
+        self.sky.y -= 1
+        i = 0
+        while i < 4:
+            for platform in self.platforms:
+                platform.x -= direction * 25
+                platform.y -= 25
+            self.draw_scene()
+            pygame.display.update()
+            i += 1
+        self.player.y = 650
+        self.draw_player_stand()
+

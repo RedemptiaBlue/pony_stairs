@@ -20,3 +20,4 @@ class Player(GameObject):
         self.high_score = 0
         self.coins = 0
         self.hearts = 0
+        self.just_revived = False
