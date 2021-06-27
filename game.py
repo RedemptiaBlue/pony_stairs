@@ -17,7 +17,6 @@ class Game:
         self.window = pygame.display.set_mode((self.width, self.height))
         self.sky = GameObject(0, -14197, self.width, 14997, 'assets/sky.png')
         self.clouds = GameObject(0, 0, self.width, self.height, 'assets/clouds.png')
-        self.game_over = GameObject(350, 250, 500, 200, 'assets/game_over_text.png')
         self.jump_key = pygame.K_SPACE
         self.turn_key = pygame.K_LCTRL
         self.platforms = []
@@ -133,16 +132,21 @@ class Game:
             self.window.blit(self.player.jump_left[frame], (self.player.x, self.player.y))
         elif self.player.direction == -1:
             self.window.blit(self.player.jump_right[frame], (self.player.x, self.player.y))
-        self.display_hub()
         pygame.display.update()
 
     def draw_player_game_over(self):
-        if self.player.direction == 1:
-            self.window.blit(self.player.loss_face_lf, (self.player.x, self.player.y))
-        elif self.player.direction == -1:
-            self.window.blit(self.player.loss_face_rf, (self.player.x, self.player.y))
-        self.display_hub()
-        pygame.display.update()
+        i = 0
+        while self.player.y < self.height + 20:
+            self.draw_scene()
+            self.draw_you_fell()
+            if self.player.direction == 1:
+                self.window.blit(self.player.loss_face_lf, (self.player.x, self.player.y))
+            elif self.player.direction == -1:
+                self.window.blit(self.player.loss_face_rf, (self.player.x, self.player.y))
+            self.display_hub()
+            pygame.display.update()
+            self.player.y += i ^ 2
+            i += 2
 
     def run_game(self):
         while not self.called_to_exit:
@@ -173,15 +177,22 @@ class Game:
             self.clock.tick(60)
         return
 
+    def draw_you_fell(self):
+        font = pygame.font.SysFont('bauhaus', 90)
+        game_over_text = font.render('You Fell', False, (200, 0, 0))
+        self.window.blit(game_over_text, (440, 340))
+
     def game_over_menu(self):
-        pygame.event.clear()
-        self.draw_scene()
         self.draw_player_game_over()
-        self.window.blit(self.game_over.image, (self.game_over.x, self.game_over.y))
-        pygame.display.update()
         if self.player.score > self.player.high_score:
             self.player.high_score = self.player.score
         self.player.score = 0
+        pygame.time.wait(1000)
+        pygame.event.clear()
+        font = pygame.font.SysFont('bauhaus', 50)
+        try_again = font.render('Press any key to try again', False, (200, 0, 0))
+        self.window.blit(try_again, (350, 420))
+        pygame.display.update()
         while True:
             events = pygame.event.get()
             for event in events:
@@ -189,8 +200,8 @@ class Game:
                     self.called_to_exit = True
                     return
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        self.set_platforms()
-                        self.sky.y = -14197
-                        self.player.direction = 1
-                        return
+                    self.set_platforms()
+                    self.sky.y = -14197
+                    self.player.direction = 1
+                    self.player.y = 650
+                    return
