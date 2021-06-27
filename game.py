@@ -161,7 +161,7 @@ class Game:
                     if event.key == self.jump_key or event.key == self.turn_key:
                         if event.key == self.jump_key:
                             self.player_jump(self.player.direction)
-                        if event.key == self.turn_key:
+                        elif event.key == self.turn_key:
                             self.player.direction = -self.player.direction
                             self.player_jump(self.player.direction)
                         if not self.is_on_platform():
@@ -189,7 +189,6 @@ class Game:
     def game_over_menu(self):
         self.draw_player_game_over()
         pygame.time.wait(1000)
-        pygame.event.clear()
         font = pygame.font.SysFont('bauhaus', 50)
         try_again = font.render('Press any key to try again', False, (200, 0, 0))
         self.window.blit(try_again, (350, 420))
@@ -198,6 +197,7 @@ class Game:
             try_again = font.render('Press return to revive', False, (200, 0, 0))
             self.window.blit(try_again, (350, 460))
         pygame.display.update()
+        pygame.event.clear()
         while True:
             events = pygame.event.get()
             for event in events:
@@ -216,6 +216,7 @@ class Game:
                     self.sky.y = -14197
                     self.player.direction = 1
                     self.player.y = 650
+                    pygame.event.clear()
                     return
 
     def use_heart(self, direction):
