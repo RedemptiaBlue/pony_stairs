@@ -57,10 +57,9 @@ class Game:
 
         def has_life_heart():
             roll = random.randint(0, 1000)
-            if roll == 1000 or self.player.score % 1000 == 0:
+            if roll == 1000 or (self.player.score and (self.player.score + 9) % 1000 == 0):
                 return True
             return False
-
         if has_coin():
             platform.item = Collectible(platform.x, platform.y, 120, 120, 'assets/coin.png', self.COIN)
         elif has_life_heart():
