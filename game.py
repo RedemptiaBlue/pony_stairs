@@ -165,13 +165,13 @@ class Game:
                             self.game_over_menu()
                         else:
                             self.player.score += 1
-                        if self.is_on_platform().item:
-                            item = self.is_on_platform().item
-                            if item.type == self.COIN:
-                                self.player.coins += 1
-                            elif item.type == self.HEART:
-                                self.player.hearts += 1
-                            self.is_on_platform().item = None
+                            if self.is_on_platform().item:
+                                item = self.is_on_platform().item
+                                if item.type == self.COIN:
+                                    self.player.coins += 1
+                                elif item.type == self.HEART:
+                                    self.player.hearts += 1
+                                self.is_on_platform().item = None
 
             self.draw_scene()
             self.draw_player_stand()
